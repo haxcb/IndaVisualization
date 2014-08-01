@@ -1,5 +1,5 @@
 var width = 800,
-	height = 500,
+	height = 900,
 	radius = 5;
 
 var force = d3.layout.force()
@@ -39,7 +39,8 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
                 "AKA": csv.AKA,
                 "FamilyName": csv.FamilyName,
                 "Importance": +csv.Importance,
-                "Gender": csv.Gender});
+                "Gender": csv.Gender });
+
     return {
         "Index": index,
     	"Name": csv.Name,
@@ -54,9 +55,9 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
         "Siblings": d3.csv.parseRows(csv.Siblings.replace(/\s*;\s*/g, ","))[0],
         "AcademyClassmates": d3.csv.parseRows(csv.AcademyClassmates.replace(/\s*;\s*/g, ","))[0],
         "CousinsWith": d3.csv.parseRows(csv.CousinsWith.replace(/\s*;\s*/g, ","))[0],
-        "RunnerFor": d3.csv.parseRows(csv.RunnerFor.replace(/\s*;\s*/g, ","))[0],
-       // "PimRyala":  +csv.PimRyala,
-        //"KodlMarines":  +csv.KodlMarines,
+        "RunnerFor": csv.RunnerFor,
+        "PimRyala":  d3.csv.parseRows(csv.PimRyala.replace(/\s*;\s*/g, ","))[0],
+        "KodlMarines":  d3.csv.parseRows(csv.KodlMarines.replace(/\s*;\s*/g, ","))[0],
         "AcademyTeacherFor":  d3.csv.parseRows(csv.AcademyTeacherFor.replace(/\s*;\s*/g, ","))[0],
     };
 }, function(error, rows){
@@ -69,48 +70,53 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
         createLinks("ChildOf", rows[i].ChildOf,i);
         createLinks("Siblings", rows[i].Siblings,i);
         createLinks("AcademyClassmates", rows[i].AcademyClassmates,i);
+        createLinks("AcademyTeacherFor", rows[i].AcademyTeacherFor,i);
         createLinks("CousinsWith", rows[i].CousinsWith,i);
         createLinks("RunnerFor", rows[i].RunnerFor,i);
-     //   createLinks("PimRyala", rows[i].PimRyala,rows);
-     //   createLinks("KodlMarines", rows[i].KodlMarines,rows);
-        createLinks("AcademyTeacherFor", rows[i].AcademyTeacherFor,i);
+        createLinks("PimRyala", rows[i].PimRyala,i);
+        createLinks("KodlMarines", rows[i].KodlMarines,i);
     }
 
-/**
-    for(var i in links) {
-        console.log(links[i]);
-    }**/
+    force
+        .nodes(nodes)
+        .links(links)
+        .start();
+
+    links = svg.selectAll(".link")
+        .data(links)
+        .enter().append("line")
+        .attr("class", "link")
+        .style("stroke-width", function(d) { return Math.sqrt(d.value); });
+
+    nodes = svg.selectAll(".node")
+        .data(nodes)
+        .enter().append("g")
+        .attr("class", "node")
+        .attr("r", radius)
+        .call(force.drag);
+            
+    nodes.append("circle")      
+        .attr("r", radius);
+    
+    nodes.append("text")
+        .attr("dx", 12)
+        .attr("dy", ".35em")
+        .style("fill", "black")
+        .text(function(d) {return d.Name});
+
+    force.on("tick", function() {
+        links.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+   
+        nodes.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+        .attr("cx", function(d) { return d.x = Math.max(radius*2, Math.min(width - radius*2, d.x)); })
+        .attr("cy", function(d) { return d.y = Math.max(radius*2, Math.min(height - radius*2, d.y)); });
+    });
 
 });
 
 
-force
-  .nodes(nodes)
-  .links(links)
-  .start();
-
-var link = svg.selectAll(".link")
-  .data(links)
-  .enter().append("line")
-  .attr("class", "link");
-
-var node = svg.selectAll(".node")
-  .data(nodes)
-  .enter().append("circle")
-  .attr("class", "node")
-  .attr("r", 5)
-  .call(force.drag);
-
-node.append("title")
-  .text(function(d) { return d.Name; });
-
-force.on("tick", function() {
-link.attr("x1", function(d) { return d.source.x; })
-    .attr("y1", function(d) { return d.source.y; })
-    .attr("x2", function(d) { return d.target.x; })
-    .attr("y2", function(d) { return d.target.y; });
-
-node.attr("cx", function(d) { return d.x; })
-    .attr("cy", function(d) { return d.y; });
-});
+    
 
