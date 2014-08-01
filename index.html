@@ -5,10 +5,10 @@
 		<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
 		
 		<title></title>
-		
 		<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+		<link href="css/fonts.css" rel="stylesheet">
 		<link href="css/style.css" rel="stylesheet">
-	
+
 	</head>
 
 	<body>
@@ -17,11 +17,91 @@
 		
 			<script src="js/d3.min.js"></script>
 
-			
-			<h1>Inda Visualization</h1>
+			<article>
+				<section>
+					<h1>Inda</h1>
+					<h2>Relationship Visualizer</h2>
+				</section>
+				
+				<section>
+					<h3>Center Point</h3>
+					<p class="centerLabel"></p>
+					<button>Change</button>
+				</section>
+				
+				<section>
+					<h3>Character Significance</h3>
+					<p class="significanceLabel"></p>
+					<form>
+						<input type="range" name="slider" id="slider" min="0" max="100" value="80">
+					</form>
+				</section>
+				
+				<section>
+					<h3>Relation Filters</h3>
+					<form class="relationFilters">		
+						<label for="marriedto">
+							<input name="relation" id="marriedto" type="checkbox" checked />
+							<img src="css/images/marriedto.png" />
+							<p>Married/Bethrothed to</p>
+						</label>	
+						<label for="loverof">
+							<input name="relation" id="loverof" type="checkbox" checked />
+							<img src="css/images/loverof.png" />
+							<p>Lover of</p>
+						</label>				
+						<label for="parentof">
+							<input name="relation" id="parentof" type="checkbox" checked />
+							<img src="css/images/parentof.png" />
+							<p>Parent of</p>
+						</label>
+						<label for="siblingof">
+							<input name="relation" id="siblingof" type="checkbox" checked />
+							<img src="css/images/siblingof.png" />
+							<p>Sibling of</p>
+						</label>
+						<label for="childof">
+							<input name="relation" id="childof" type="checkbox" checked />
+							<img src="css/images/childof.png" />
+							<p>Child of</p>
+						</label>
+						<label for="cousinof">
+							<input name="relation" id="cousinof" type="checkbox" checked />
+							<img src="css/images/cousinof.png" />
+							<p>Cousin of</p>
+						</label>
+						<label for="classmateof">
+							<input name="relation" id="classmateof" type="checkbox" checked />
+							<img src="css/images/classmateof.png" />
+							<p>Classmate of</p>
+						</label>
+						<label for="teacherof">
+							<input name="relation" id="teacherof" type="checkbox" checked />
+							<img src="css/images/teacherof.png" />
+							<p>Academy Teacher of</p>
+						</label>
+						<label for="runnerof">
+							<input name="relation" id="runnerof" type="checkbox" checked />
+							<img src="css/images/runnerof.png" />
+							<p>Runner of</p>
+						</label>
+						<label for="pimryala">
+							<input name="relation" id="pimryala" type="checkbox" checked />
+							<img src="css/images/pimryala.png" />
+							<p>Shipmate on Pim Ryala</p>
+						</label>
+						<label for="kodlmarine">
+							<input name="relation" id="kodlmarine" type="checkbox" checked />
+							<img src="css/images/kodlmarine.png" />
+							<p>Kodl's Marine with</p>
+						</label>
 
+					</form>
+				</section>
+				
+			</article>
 			<script src="js/script.js"></script>	
-		
+			<div class="clear"></div>
 		</div>
 		
 	</body>

@@ -5,27 +5,74 @@
 	font-weight:100;
 	color:#ffa133;
 	text-transform:uppercase;
+	box-sizing:border-box;
 }
-
+html {
+	background-color:#363636; 
+}
 body {
-	background-color:#4c4c4c;
-	
+	min-width:1300px;
+	background-color:#363636; 
+	background-image: -webkit-linear-gradient(
+		left, 
+		#4c4c4c, 
+		#4c4c4c 350px,
+		#363636 350px,
+		#363636 
+	);
+	background-image: -moz-linear-gradient(
+		left, 
+		#4c4c4c, 
+		#4c4c4c 350px,
+		#363636 350px,
+		#363636 
+	);
+	background-image: -ms-linear-gradient(
+		left, 
+		#4c4c4c, 
+		#4c4c4c 350px,
+		#363636 350px,
+		#363636 
+	);
+	background-image: -o-linear-gradient(
+		left, 
+		#4c4c4c, 
+		#4c4c4c 350px,
+		#363636 350px,
+		#363636
+	);
 }
 
 .container {
-	width:1200px;
-	margin:10px auto 20px auto;
+	width:1000px;
+	margin-left:350px;
 }
 
 .container > svg {
-	background-color:#363636;
+	/* background-color:#363636; */
 }
 
-h1 {
+h1,
+h2, 
+h3 {
 	font-weight:100;
 	text-align:center;
 }
 
+h1 {
+	font-size:50px;
+	font-family:'Optimus', 'Open Sans', sans-serif;
+	font-family:100;
+}
+
+h2 {
+	font-size:16px;
+}
+
+h3 {
+	font-size:16px;
+	color:#d3d3d3;
+}
 
 .link {
   stroke: #636363;
@@ -40,3 +87,104 @@ text {
 	color:#ffa133;
 	font-size:12px;
 }
+
+article {
+	position:absolute;
+	left:0;
+	top:0;
+	display:block;
+	width:350px;
+	padding:15px 30px;
+	box-sizing:border-box;
+	background-color:#4c4c4c;
+	
+}
+
+section {
+	margin-bottom:40px;
+}
+
+label {
+	font-size:12px;
+}
+
+.clear {
+	clear:both;
+}
+
+
+
+button {
+	width:100%;
+	border-radius:5px;
+	padding:10px 5px;
+	background-color:#ffa133;
+	border:none;
+	color:#333;
+	margin:10px 0;
+	font-size:16px;
+}
+
+
+
+input[type="range"]{
+	margin-top:15px;
+	width:100%;
+    background:#ffa133;
+    height: 20px;
+    -webkit-appearance: none;
+}
+
+
+input[type="range"]::-webkit-slider-thumb{
+   -webkit-appearance:none !important;  
+   width:31px;
+   height:42px;
+   -webkit-appearance: none;
+	background-image:url('images/slider.png');	
+ }
+
+input[type="range"]::-webkit-slider-thumb:hover{
+   -webkit-appearance:none !important;  
+   -webkit-appearance: none;
+}
+
+.relationFilters label {
+	display:block;
+	clear:both;
+}
+
+.relationFilters input[type="checkbox"] {
+	display:none;
+}
+
+.relationFilters p {
+	display:block;
+	float:left;
+	margin-top:7px;
+	font-size:14px;
+}
+
+.relationFilters input[type="checkbox"] + img {
+	background-color:#999999;	
+	border-radius:50%;
+	float:left;
+	margin-right:10px;
+	margin-bottom:10px;
+}
+	
+.relationFilters input[type="checkbox"]:checked + img {	
+	background-color:#ffa133;
+}
+	
+.relationFilters input[type="checkbox"] + p {	
+	color:#999999;
+}	
+.relationFilters input[type="checkbox"]:checked + p {	
+	color:#ffa133;
+}
+
+
+
+
+

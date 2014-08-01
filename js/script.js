@@ -1,4 +1,4 @@
-var width = 1200,
+var width = 1000,
 	height = 800,
 	radius = 5;
 	
@@ -94,44 +94,44 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
         createLinks("PimRyala", rows[i].PimRyala,i);
         createLinks("KodlMarines", rows[i].KodlMarines,i);
     }
-
     force
         .nodes(nodes)
         .links(links)
         .start();
 
-    links = svg.selectAll(".link")
+    var linkItems = svg.selectAll(".link")
         .data(links)
         .enter().append("line")
         .attr("class", "link")
         .style("stroke-width", function(d) { return Math.sqrt(d.value); });
 
-    nodes = svg.selectAll(".node")
+    var nodeItems = svg.selectAll(".node")
         .data(nodes)
         .enter().append("g")
         .attr("class", "node")
         .attr("r", radius)
         .call(force.drag);
             
-    nodes.append("circle")      
+    nodeItems.append("circle")      
         .attr("r", radius);
     
-    nodes.append("text")
+    nodeItems.append("text")
         .attr("dx", 12)
         .attr("dy", ".35em")
 		.style("fill", orange)
         .text(function(d) {return d.Name});
 
     force.on("tick", function() {
-        links.attr("x1", function(d) { return d.source.x; })
+        linkItems.attr("x1", function(d) { return d.source.x; })
         .attr("y1", function(d) { return d.source.y; })
         .attr("x2", function(d) { return d.target.x; })
         .attr("y2", function(d) { return d.target.y; });
    
-        nodes.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+        nodeItems.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
         .attr("cx", function(d) { return d.x = Math.max(radius*2, Math.min(width - radius*2, d.x)); })
         .attr("cy", function(d) { return d.y = Math.max(radius*2, Math.min(height - radius*2, d.y)); });
     });
+	
 
 });
 
