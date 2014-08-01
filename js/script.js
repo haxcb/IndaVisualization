@@ -19,7 +19,10 @@ function createLinks(relationshipType, people,sourceIndex) {
     for (var p in people) {
         var targetIndex = -1;
         for(var j in nodes) {
-            if(people[p] == nodes[j].Name + " " + nodes[j].FamilyName + " (" + nodes[j].AKA + ")" )  {
+            if(people[p] == (nodes[j].Name + " " + nodes[j].FamilyName + " (" + nodes[j].AKA + ")") )  {
+                targetIndex = nodes[j].Index;
+            }
+            else if (people[p] == (nodes[j].Name + " " + nodes[j].FamilyName)) {
                 targetIndex = nodes[j].Index;
             }
         }
