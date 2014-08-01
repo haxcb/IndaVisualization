@@ -1,10 +1,12 @@
-var width = 800,
-	height = 900,
+var width = 1200,
+	height = 800,
 	radius = 5;
+	
+var orange = d3.rgb(255, 161, 51);	
 
 var force = d3.layout.force()
 	.charge(-500)
-	.linkDistance(100)
+	.linkDistance(200)
 	.size([width, height]);
 
 var svg = d3.select(".container").append("svg")
@@ -15,7 +17,7 @@ var nodes = [],
     links = [];
 
 
-function createLinks(relationshipType, people,sourceIndex) {
+function createLinks(relationshipType, people, sourceIndex) {
     if(people && people.length > 0) {
         for(var p in people) {
             var targetIndex = -1;
@@ -34,7 +36,7 @@ function createLinks(relationshipType, people,sourceIndex) {
                     break;
                 }
             }
-            if (!(targetIndex == -1)) {
+            if (targetIndex != -1) {
                 links.push({ "type": relationshipType, 
                          "target": +targetIndex, 
                          "source": +sourceIndex });
@@ -43,6 +45,9 @@ function createLinks(relationshipType, people,sourceIndex) {
     } 
 }
 
+function csvToArr(csvData) {
+	return d3.csv.parseRows(csvData.replace(/\s*;\s*/g, ","))[0];
+}
 
 d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) { 
 
@@ -60,18 +65,19 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
         "FamilyName": csv.FamilyName,
         "Importance": +csv.Importance,
         "Gender": csv.Gender,
-        "ParentOf": d3.csv.parseRows(csv.ParentOf.replace(/\s*;\s*/g, ","))[0],
-        "SpouseOrBetrothed": d3.csv.parseRows(csv.SpouseOrBetrothed.replace(/\s*;\s*/g, ","))[0],
-        "InloveWith": d3.csv.parseRows(csv.InloveWith.replace(/\s*;\s*/g, ","))[0],
-        "ChildOf": d3.csv.parseRows(csv.ChildOf.replace(/\s*;\s*/g, ","))[0],
-        "Siblings": d3.csv.parseRows(csv.Siblings.replace(/\s*;\s*/g, ","))[0],
-        "AcademyClassmates": d3.csv.parseRows(csv.AcademyClassmates.replace(/\s*;\s*/g, ","))[0],
-        "CousinsWith": d3.csv.parseRows(csv.CousinsWith.replace(/\s*;\s*/g, ","))[0],
-        "RunnerFor": d3.csv.parseRows(csv.RunnerFor.replace(/\s*;\s*/g, ","))[0],
-        "PimRyala":  d3.csv.parseRows(csv.PimRyala.replace(/\s*;\s*/g, ","))[0],
-        "KodlMarines":  d3.csv.parseRows(csv.KodlMarines.replace(/\s*;\s*/g, ","))[0],
-        "AcademyTeacherFor":  d3.csv.parseRows(csv.AcademyTeacherFor.replace(/\s*;\s*/g, ","))[0],
+        "ParentOf": csvToArr(csv.ParentOf),
+        "SpouseOrBetrothed": csvToArr(csv.SpouseOrBetrothed),
+        "InloveWith": csvToArr(csv.InloveWith),
+        "ChildOf": csvToArr(csv.ChildOf),
+        "Siblings": csvToArr(csv.Siblings),
+        "AcademyClassmates": csvToArr(csv.AcademyClassmates),
+        "CousinsWith": csvToArr(csv.CousinsWith),
+        "RunnerFor": csvToArr(csv.RunnerFor),
+        "PimRyala":  csvToArr(csv.PimRyala),
+        "KodlMarines": csvToArr(csv.KodlMarines),
+        "AcademyTeacherFor": csvToArr(csv.AcademyTeacherFor),
     };
+	
 }, function(error, rows){
     console.log(rows);
 
@@ -113,7 +119,7 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
     nodes.append("text")
         .attr("dx", 12)
         .attr("dy", ".35em")
-        .style("fill", "black")
+		.style("fill", orange)
         .text(function(d) {return d.Name});
 
     force.on("tick", function() {

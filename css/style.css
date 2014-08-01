@@ -3,16 +3,22 @@
 	padding:0;
 	font-family: 'Open Sans', sans-serif;
 	font-weight:100;
-	color:black;
+	color:#ffa133;
+	text-transform:uppercase;
+}
+
+body {
+	background-color:#4c4c4c;
+	
 }
 
 .container {
-	width:800px;
-	margin:10px auto 0 auto;
+	width:1200px;
+	margin:10px auto 20px auto;
 }
 
 .container > svg {
-	border:1px solid #DEDEDE;
+	background-color:#363636;
 }
 
 h1 {
@@ -20,12 +26,17 @@ h1 {
 	text-align:center;
 }
 
-.node {
-  stroke: black;
-  stroke-width: 1.5px;
-}
 
 .link {
-  stroke: #999;
+  stroke: #636363;
   stroke-opacity: .6;
+}
+
+.node {
+	fill:#ffa133;
+}
+
+text {
+	color:#ffa133;
+	font-size:12px;
 }
