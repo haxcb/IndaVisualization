@@ -4,7 +4,7 @@ var width = 800,
 
 var force = d3.layout.force()
 	.charge(-500)
-	.linkDistance(50)
+	.linkDistance(100)
 	.size([width, height]);
 
 var svg = d3.select(".container").append("svg")
@@ -16,22 +16,31 @@ var nodes = [],
 
 
 function createLinks(relationshipType, people,sourceIndex) {
-    for (var p in people) {
-        var targetIndex = -1;
-        for(var j in nodes) {
-            if(people[p] == (nodes[j].Name + " " + nodes[j].FamilyName + " (" + nodes[j].AKA + ")") )  {
-                targetIndex = nodes[j].Index;
+    if(people && people.length > 0) {
+        for(var p in people) {
+            var targetIndex = -1;
+            for(var j in nodes) {
+                
+                if(people[p] == (nodes[j].Name + " " + nodes[j].FamilyName + " (" + nodes[j].AKA + ")") )  {
+                    targetIndex = nodes[j].Index;
+                    break;
+                }
+                else if (people[p] == (nodes[j].Name + " " + nodes[j].FamilyName)) {
+                    targetIndex = nodes[j].Index;
+                    break;
+                }
+                else if (people[p] == nodes[j].Name) {
+                    targetIndex = nodes[j].Index;
+                    break;
+                }
             }
-            else if (people[p] == (nodes[j].Name + " " + nodes[j].FamilyName)) {
-                targetIndex = nodes[j].Index;
+            if (!(targetIndex == -1)) {
+                links.push({ "type": relationshipType, 
+                         "target": +targetIndex, 
+                         "source": +sourceIndex });
             }
-        }
-        if (!(targetIndex == -1)) {
-            links.push({ "type": relationshipType, 
-                     "target": +targetIndex, 
-                     "source": +sourceIndex });
-        }
-    };
+        };
+    } 
 }
 
 
@@ -58,7 +67,7 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
         "Siblings": d3.csv.parseRows(csv.Siblings.replace(/\s*;\s*/g, ","))[0],
         "AcademyClassmates": d3.csv.parseRows(csv.AcademyClassmates.replace(/\s*;\s*/g, ","))[0],
         "CousinsWith": d3.csv.parseRows(csv.CousinsWith.replace(/\s*;\s*/g, ","))[0],
-        "RunnerFor": csv.RunnerFor,
+        "RunnerFor": d3.csv.parseRows(csv.RunnerFor.replace(/\s*;\s*/g, ","))[0],
         "PimRyala":  d3.csv.parseRows(csv.PimRyala.replace(/\s*;\s*/g, ","))[0],
         "KodlMarines":  d3.csv.parseRows(csv.KodlMarines.replace(/\s*;\s*/g, ","))[0],
         "AcademyTeacherFor":  d3.csv.parseRows(csv.AcademyTeacherFor.replace(/\s*;\s*/g, ","))[0],
