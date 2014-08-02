@@ -103,9 +103,8 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
     }
 
     selectedNode = nodes[0];
+
     buildVisual();
-
-
 });
 
 var visibleNodes = []
@@ -141,6 +140,10 @@ function buildVisual() {
         .attr("class", "node")
         .attr("r", radius)
         .filter(function(currentNode, currentIndex) {
+           /** if(currentNode.Index == selectedNode.Index) {
+                currentNode.x = width/2;
+                currentNode.y = height/2;
+            }**/
             for(var i in visibleNodes) {
                 if(currentNode.Index == visibleNodes[i].Index || selectedNode.Index == currentNode.Index) {
                     return true;
@@ -151,11 +154,45 @@ function buildVisual() {
         .on("click", function (currentNode, currentIndex) {
             selectedNode = currentNode;
             buildVisual();
-        }) 
+        })
         .call(force.drag);
-            
+
+
+    svg.selectAll(".node")
+        .filter(function(currentNode, currentIndex) {
+            for(var i in visibleNodes) {
+                if(currentNode.Index == visibleNodes[i].Index || currentNode.Index == selectedNode.Index)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }).remove();
+
+    svg.selectAll(".link")
+    .filter(function(currentLink, currentIndex) {
+        if(currentLink.source.Index == selectedNode.Index) {
+            for(var i in visibleNodes) {
+                if(visibleNodes[i].Index == currentLink.target.Index) {
+                    return false;
+                }
+            }
+            return true;
+        } 
+        else if(currentLink.target.Index == selectedNode.Index) {
+            for(var i in visibleNodes) {
+                if(visibleNodes[i].Index == currentLink.source.Index) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return true;
+    }).remove();
+           
     nodeItems.append("circle")      
         .attr("r", radius);
+
     
     nodeItems.append("text")
         .attr("dx", 12)
