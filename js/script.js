@@ -127,7 +127,7 @@ function buildVisual() {
                 visibleNodes.push(currentLink.target);
                 return true;
             }
-            else if(selectedNode == currentLink.target.Index) {
+            else if(selectedNode.Index == currentLink.target.Index) {
                 visibleNodes.push(currentLink.source);
                 return true;
             }
@@ -161,7 +161,12 @@ function buildVisual() {
         .attr("dx", 12)
         .attr("dy", ".35em")
         .style("fill", orange)
-        .text(function(d) {return (d.Name + " " + d.FamilyName + " " + d.AKA)});
+        .text(function(d) {
+            if(d.AKA != "") {
+                return (d.Name + " " + d.FamilyName + " (" + d.AKA + ")");
+            }
+            return (d.Name + " " + d.FamilyName);
+        });
 
     force.on("tick", function() {
         linkItems.attr("x1", function(d) { return d.source.x; })
