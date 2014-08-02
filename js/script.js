@@ -1,6 +1,6 @@
 var width = 1000,
 	height = 800,
-	radius = 5;
+	radius = 15;
 	
 var orange = d3.rgb(255, 161, 51);	
 
@@ -91,6 +91,7 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
         "RunnerFor": csvToArr(csv.RunnerFor),
         "PimRyala":  csvToArr(csv.PimRyala),
         "KodlMarines": csvToArr(csv.KodlMarines),
+        "ServedBy": csvToArr(csv.ServedBy),
         "AcademyTeacherFor": csvToArr(csv.AcademyTeacherFor),
     };
 	
@@ -108,6 +109,7 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
         createLinks("CousinsWith", rows[i].CousinsWith,i);
         createLinks("RunnerFor", rows[i].RunnerFor,i);
         createLinks("PimRyala", rows[i].PimRyala,i);
+        createLinks("ServedBy", rows[i].ServedBy,i);
         createLinks("KodlMarines", rows[i].KodlMarines,i);
     }
 
@@ -122,6 +124,7 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
                         {type: "CousinsWith", checked: true},
                         {type: "RunnerFor", checked: true},
                         {type: "PimRyala", checked: true},
+                        {type: "ServedBy", checked: true},
                         {type: "KodlMarines", checked: true}];
 
     selectedNode = nodes[0];
@@ -171,6 +174,15 @@ function resetFilters() {
     significanceFilter = 1;
     d3.select('#slider').property('value',1);
     d3.select('.centerPoint').property('value',selectedNode.Index);
+}
+
+function getLink(currentNode) {
+    for(var i in links) {
+        if(links[i].source.Index == selectedNode.Index && links[i].target.Index == currentNode.Index) {
+            return links[i];
+        }
+    }
+    return null;
 }
 
 function buildVisual() {
@@ -225,6 +237,7 @@ function buildVisual() {
             buildVisual();
         })
         .call(force.drag);
+        
 
 
     svg.selectAll(".node")
@@ -262,9 +275,8 @@ function buildVisual() {
     nodeItems.append("circle")      
         .attr("r", radius);
 
-    
     nodeItems.append("text")
-        .attr("dx", 12)
+        .attr("dx", 25)
         .attr("dy", ".35em")
         .style("fill", orange)
         .text(function(d) {
@@ -273,6 +285,19 @@ function buildVisual() {
             }
             return (d.Name + " " + d.FamilyName);
         });
+
+    nodeItems.append("image")
+        .attr("xlink:href", function(currentNode,currentIndex) {
+            var link = getLink(currentNode);
+            if(link != null) {
+                return "http://www.sfu.ca/~ssumal/Inda/css/images/" + link.type + ".png";
+            }
+        })
+        .attr("x", -15)
+        .attr("y", -15)
+        .attr("height", 31)
+        .attr("width", 31);
+
 
     force.on("tick", function() {
         linkItems.attr("x1", function(d) { return d.source.x; })
@@ -285,6 +310,7 @@ function buildVisual() {
         .attr("cy", function(d) { return d.y = Math.max(radius*2, Math.min(height - radius*2, d.y)); });
     });
 }
+
 
     
 
