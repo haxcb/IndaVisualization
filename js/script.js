@@ -5,8 +5,8 @@ var width = 1000,
 var orange = d3.rgb(255, 161, 51);	
 
 var force = d3.layout.force()
-	.charge(-500)
-	.linkDistance(200)
+	.charge(-600)
+	.linkDistance(260)
 	.size([width, height]);
 
 var svg = d3.select(".container").append("svg")
@@ -15,6 +15,9 @@ var svg = d3.select(".container").append("svg")
 		
 var nodes = [],
     links = [];
+
+
+var selectedNode = 0;
 
 
 function createLinks(relationshipType, people, sourceIndex) {
@@ -32,6 +35,10 @@ function createLinks(relationshipType, people, sourceIndex) {
                     break;
                 }
                 else if (people[p] == nodes[j].Name) {
+                    targetIndex = nodes[j].Index;
+                    break;
+                }
+                else if (people[p] == nodes[j].Name + " ("  + nodes[j].AKA + ")") {
                     targetIndex = nodes[j].Index;
                     break;
                 }
@@ -94,6 +101,18 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
         createLinks("PimRyala", rows[i].PimRyala,i);
         createLinks("KodlMarines", rows[i].KodlMarines,i);
     }
+
+    selectedNode = nodes[0];
+    buildVisual();
+
+
+});
+
+var visibleNodes = []
+
+function buildVisual() {
+    visibleNodes = [];
+    svg.html("");
     force
         .nodes(nodes)
         .links(links)
@@ -103,6 +122,17 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
         .data(links)
         .enter().append("line")
         .attr("class", "link")
+        .filter(function(currentLink, currentIndex) {
+            if(selectedNode.Index == currentLink.source.Index) {
+                visibleNodes.push(currentLink.target);
+                return true;
+            }
+            else if(selectedNode == currentLink.target.Index) {
+                visibleNodes.push(currentLink.source);
+                return true;
+            }
+            return false;
+        })
         .style("stroke-width", function(d) { return Math.sqrt(d.value); });
 
     var nodeItems = svg.selectAll(".node")
@@ -110,6 +140,18 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
         .enter().append("g")
         .attr("class", "node")
         .attr("r", radius)
+        .filter(function(currentNode, currentIndex) {
+            for(var i in visibleNodes) {
+                if(currentNode.Index == visibleNodes[i].Index || selectedNode.Index == currentNode.Index) {
+                    return true;
+                } 
+            }
+            return false;
+        })
+        .on("click", function (currentNode, currentIndex) {
+            selectedNode = currentNode;
+            buildVisual();
+        }) 
         .call(force.drag);
             
     nodeItems.append("circle")      
@@ -118,8 +160,8 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
     nodeItems.append("text")
         .attr("dx", 12)
         .attr("dy", ".35em")
-		.style("fill", orange)
-        .text(function(d) {return d.Name});
+        .style("fill", orange)
+        .text(function(d) {return (d.Name + " " + d.FamilyName + " " + d.AKA)});
 
     force.on("tick", function() {
         linkItems.attr("x1", function(d) { return d.source.x; })
@@ -131,10 +173,7 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
         .attr("cx", function(d) { return d.x = Math.max(radius*2, Math.min(width - radius*2, d.x)); })
         .attr("cy", function(d) { return d.y = Math.max(radius*2, Math.min(height - radius*2, d.y)); });
     });
-	
-
-});
-
+}
 
     
 
