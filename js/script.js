@@ -4,20 +4,29 @@ var width = 1000,
 	
 var orange = d3.rgb(255, 161, 51);	
 
-var force = d3.layout.force()
+/**var force = d3.layout.force()
 	.charge(-600)
 	.linkDistance(260)
-	.size([width, height]);
+	.size([width, height]); **/
+
+var force = d3.layout.force()
+    .charge(-600)
+    .linkDistance(260)
+    .size([width, height]);
 
 var svg = d3.select(".container").append("svg")
 	.attr("width", width)
 	.attr("height", height);
 		
 var nodes = [],
-    links = [];
+    links = [],
+    visibleNodes = [];
 
 
 var selectedNode = 0;
+
+var relationshipStatus = [];
+var significanceFilter = 1;
 
 
 function createLinks(relationshipType, people, sourceIndex) {
@@ -74,7 +83,7 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
         "Gender": csv.Gender,
         "ParentOf": csvToArr(csv.ParentOf),
         "SpouseOrBetrothed": csvToArr(csv.SpouseOrBetrothed),
-        "InloveWith": csvToArr(csv.InloveWith),
+        "InLoveWith": csvToArr(csv.InLoveWith),
         "ChildOf": csvToArr(csv.ChildOf),
         "Siblings": csvToArr(csv.Siblings),
         "AcademyClassmates": csvToArr(csv.AcademyClassmates),
@@ -91,7 +100,7 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
     for(var i in rows) {
         createLinks("ParentOf", rows[i].ParentOf,i);
         createLinks("SpouseOrBetrothed", rows[i].SpouseOrBetrothed,i);
-        createLinks("InloveWith", rows[i].InloveWith,i);
+        createLinks("InLoveWith", rows[i].InLoveWith,i);
         createLinks("ChildOf", rows[i].ChildOf,i);
         createLinks("Siblings", rows[i].Siblings,i);
         createLinks("AcademyClassmates", rows[i].AcademyClassmates,i);
@@ -102,12 +111,67 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
         createLinks("KodlMarines", rows[i].KodlMarines,i);
     }
 
+    relationshipStatus = [  
+                        {type: "ParentOf", checked: true},
+                        {type: "SpouseOrBetrothed", checked: true},
+                        {type: "ChildOf", checked: true},
+                        {type: "InLoveWith", checked: true},
+                        {type: "Siblings", checked: true}, 
+                        {type: "AcademyClassmates", checked: true},
+                        {type: "AcademyTeacherFor", checked: true},
+                        {type: "CousinsWith", checked: true},
+                        {type: "RunnerFor", checked: true},
+                        {type: "PimRyala", checked: true},
+                        {type: "KodlMarines", checked: true}];
+
     selectedNode = nodes[0];
 
+    setUpInteractions();
     buildVisual();
 });
 
-var visibleNodes = []
+function setUpInteractions() {
+    var opts = '';
+    for(var i in nodes) {
+        opts += '<option value="' + i + '">' + (nodes[i].Name + " " + nodes[i].FamilyName) + '</option>';
+    }
+    d3.select('.centerPoint').html(opts);
+    d3.select('.centerPoint').on('change',changeCenterPoint);
+    d3.selectAll('.relationFilters input').on('change',getRelationships);
+    d3.select('#slider').on('change',changeCharacterSignificance);
+}
+
+function getRelationships() {
+    var checkedStatus = d3.select(this).node().checked;
+    var relationType = d3.select(this).node().id;
+    for(var i in relationshipStatus) {
+        if(relationType == relationshipStatus[i].type) {
+            relationshipStatus[i].checked = Boolean(checkedStatus);
+        }
+    }
+    buildVisual();
+}
+
+function changeCharacterSignificance() {
+    significanceFilter = d3.event.target.value;
+    buildVisual();
+}
+
+function changeCenterPoint() {
+    selectedNode = nodes[d3.event.target.value];
+    resetFilters();
+    buildVisual();
+}
+
+function resetFilters() {
+    for(var i in relationshipStatus) {
+        relationshipStatus[i].checked = true;
+        d3.selectAll('.relationFilters input').property('checked', 'true');
+    } 
+    significanceFilter = 1;
+    d3.select('#slider').property('value',1);
+    d3.select('.centerPoint').property('value',selectedNode.Index);
+}
 
 function buildVisual() {
     visibleNodes = [];
@@ -122,13 +186,17 @@ function buildVisual() {
         .enter().append("line")
         .attr("class", "link")
         .filter(function(currentLink, currentIndex) {
-            if(selectedNode.Index == currentLink.source.Index) {
-                visibleNodes.push(currentLink.target);
-                return true;
-            }
-            else if(selectedNode.Index == currentLink.target.Index) {
-                visibleNodes.push(currentLink.source);
-                return true;
+            for(var i in relationshipStatus) {
+                if(currentLink.type == relationshipStatus[i].type && relationshipStatus[i].checked) {
+                    if(selectedNode.Index == currentLink.source.Index && currentLink.target.Importance >= significanceFilter) {
+                        visibleNodes.push(currentLink.target);
+                        return true;
+                    }
+                    else if(selectedNode.Index == currentLink.target.Index && currentLink.source.Importance >= significanceFilter) {
+                        visibleNodes.push(currentLink.source);
+                        return true;
+                    }
+                }
             }
             return false;
         })
@@ -140,10 +208,10 @@ function buildVisual() {
         .attr("class", "node")
         .attr("r", radius)
         .filter(function(currentNode, currentIndex) {
-           /** if(currentNode.Index == selectedNode.Index) {
+            if(currentNode.Index == selectedNode.Index) {
                 currentNode.x = width/2;
                 currentNode.y = height/2;
-            }**/
+            }
             for(var i in visibleNodes) {
                 if(currentNode.Index == visibleNodes[i].Index || selectedNode.Index == currentNode.Index) {
                     return true;
@@ -153,6 +221,7 @@ function buildVisual() {
         })
         .on("click", function (currentNode, currentIndex) {
             selectedNode = currentNode;
+            resetFilters();
             buildVisual();
         })
         .call(force.drag);
