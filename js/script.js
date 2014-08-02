@@ -4,11 +4,6 @@ var width = 1000,
 	
 var orange = d3.rgb(255, 161, 51);	
 
-/**var force = d3.layout.force()
-	.charge(-600)
-	.linkDistance(260)
-	.size([width, height]); **/
-
 var force = d3.layout.force()
     .charge(-600)
     .linkDistance(260)
@@ -92,6 +87,7 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
         "PimRyala":  csvToArr(csv.PimRyala),
         "KodlMarines": csvToArr(csv.KodlMarines),
         "ServedBy": csvToArr(csv.ServedBy),
+        "TaughtBy": csvToArr(csv.TaughtBy),
         "AcademyTeacherFor": csvToArr(csv.AcademyTeacherFor),
     };
 	
@@ -111,6 +107,7 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
         createLinks("PimRyala", rows[i].PimRyala,i);
         createLinks("ServedBy", rows[i].ServedBy,i);
         createLinks("KodlMarines", rows[i].KodlMarines,i);
+        createLinks("TaughtBy", rows[i].TaughtBy,i);
     }
 
     relationshipStatus = [  
@@ -125,6 +122,7 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
                         {type: "RunnerFor", checked: true},
                         {type: "PimRyala", checked: true},
                         {type: "ServedBy", checked: true},
+                        {type: "TaughtBy", checked: true},
                         {type: "KodlMarines", checked: true}];
 
     selectedNode = nodes[0];
@@ -202,10 +200,6 @@ function buildVisual() {
                 if(currentLink.type == relationshipStatus[i].type && relationshipStatus[i].checked) {
                     if(selectedNode.Index == currentLink.source.Index && currentLink.target.Importance >= significanceFilter) {
                         visibleNodes.push(currentLink.target);
-                        return true;
-                    }
-                    else if(selectedNode.Index == currentLink.target.Index && currentLink.source.Importance >= significanceFilter) {
-                        visibleNodes.push(currentLink.source);
                         return true;
                     }
                 }
@@ -297,7 +291,6 @@ function buildVisual() {
         .attr("y", -15)
         .attr("height", 31)
         .attr("width", 31);
-
 
     force.on("tick", function() {
         linkItems.attr("x1", function(d) { return d.source.x; })
