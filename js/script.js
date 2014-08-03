@@ -23,12 +23,15 @@ var nodes = [],
     links = [],
     visibleNodes = [];
 
-
 var selectedNode = 0;
 
 var relationshipStatus = [];
 var significanceFilter = 1;
 
+
+////////////////////////////////////////////////////////
+//				PARSE DATA
+////////////////////////////////////////////////////////
 
 function createLinks(relationshipType, people, sourceIndex) {
     if(people && people.length > 0) {
@@ -60,10 +63,6 @@ function createLinks(relationshipType, people, sourceIndex) {
             }
         };
     } 
-}
-
-function csvToArr(csvData) {
-	return d3.csv.parseRows(csvData.replace(/\s*;\s*/g, ","))[0];
 }
 
 d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) { 
@@ -137,6 +136,11 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
     buildVisual();
 });
 
+
+////////////////////////////////////////////////////////
+//			EVENT HANDLERS & LISTENERS
+////////////////////////////////////////////////////////
+
 function setUpInteractions() {
     var opts = '';
     for(var i in nodes) {
@@ -170,28 +174,15 @@ function changeCenterPoint() {
     buildVisual();
 }
 
-function resetFilters() {
-    for(var i in relationshipStatus) {
-        relationshipStatus[i].checked = true;
-        d3.selectAll('.relationFilters input').property('checked', 'true');
-    } 
-    significanceFilter = 1;
-    d3.select('#slider').property('value',1);
-    d3.select('.centerPoint').property('value',selectedNode.Index);
-}
+////////////////////////////////////////////////////////
+//				DRAW CODE
+////////////////////////////////////////////////////////
 
-function getLink(currentNode) {
-    for(var i in links) {
-        if(links[i].source.Index == selectedNode.Index && links[i].target.Index == currentNode.Index) {
-            return links[i];
-        }
-    }
-    return null;
-}
 
 function buildVisual() {
     visibleNodes = [];
     svg.html("");
+	
     force
         .nodes(nodes)
         .links(links)
@@ -217,7 +208,6 @@ function buildVisual() {
     var nodeItems = svg.selectAll(".node")
         .data(nodes)
         .enter().append("g")
-        .attr("class", "node")
         .attr("r", radius)
         .filter(function(currentNode, currentIndex) {
             if(currentNode.Index == selectedNode.Index) {
@@ -235,6 +225,7 @@ function buildVisual() {
             }
             return false;
         })
+		.attr("class", function(currentNode, currentIndex) { return "node node" + currentIndex; })
         .on("click", function (currentNode, currentIndex) {
             selectedNode = currentNode;
             resetFilters();
@@ -242,7 +233,7 @@ function buildVisual() {
         });
         
 
-
+	// Remove undrawn nodes
     svg.selectAll(".node")
         .filter(function(currentNode, currentIndex) {
             for(var i in visibleNodes) {
@@ -254,31 +245,34 @@ function buildVisual() {
             return true;
         }).remove();
 
+		
+	// Remove undrawn links
     svg.selectAll(".link")
-    .filter(function(currentLink, currentIndex) {
-        if(currentLink.source.Index == selectedNode.Index) {
-            for(var i in visibleNodes) {
-                if(visibleNodes[i].Index == currentLink.target.Index) {
-                    return false;
-                }
-            }
-            return true;
-        } 
-        else if(currentLink.target.Index == selectedNode.Index) {
-            for(var i in visibleNodes) {
-                if(visibleNodes[i].Index == currentLink.source.Index) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return true;
-    }).remove();
+		.filter(function(currentLink, currentIndex) {
+			if(currentLink.source.Index == selectedNode.Index) {
+				for(var i in visibleNodes) {
+					if(visibleNodes[i].Index == currentLink.target.Index) {
+						return false;
+					}
+				}
+				return true;
+			} 
+			else if(currentLink.target.Index == selectedNode.Index) {
+				for(var i in visibleNodes) {
+					if(visibleNodes[i].Index == currentLink.source.Index) {
+						return false;
+					}
+				}
+				return true;
+			}
+			return true;
+		}).remove();
            
+		   
     nodeItems.append("circle")      
         .attr("r", radius);
-		
-    
+		  
+		  
 	nodeItems.append("text")
         .attr("dx", 25)
         .attr("dy", ".35em")
@@ -289,6 +283,7 @@ function buildVisual() {
             }
             return (d.Name + " " + d.FamilyName);
         });
+		
 		
 	// Add rectangles behind text labels
 	var el = document.getElementsByTagName('text'); 
@@ -301,7 +296,6 @@ function buildVisual() {
 		.attr("fill", bg);	
 	
 	// Reorder the rectangles to be behind text
-	
 	moveToFront(d3.selectAll("text"));
 	
 	// Add image icons to nodes
@@ -337,11 +331,20 @@ function buildVisual() {
 	centralNode.selectAll("rect")
 		.attr("x", 25)
 		.attr("width", function(currentNode, currentIndex) { return this.getBBox().width + 45; });
-		
 
-	
-	
 	nodeItems.call(force.drag);
+	
+	// Fade in?? 
+	d3.selectAll(".node").style("opacity", 0.0)
+		.transition()
+		.duration(500)
+		.style("opacity", 1.0)
+		.each("end", function() {
+			d3.selectAll(".node").on("mouseover", function(currentNode, currentIndex) {
+				console.log(".node" + currentIndex);
+				moveToFront(d3.select(".node" + currentIndex));
+			});
+		});
 
     force.on("tick", function(e) {
         linkItems.attr("x1", function(d) { return d.source.x; })
@@ -356,8 +359,39 @@ function buildVisual() {
     });
 }
 
+////////////////////////////////////////////////////////
+//				HELPER METHODS
+////////////////////////////////////////////////////////
+
+function csvToArr(csvData) {
+	return d3.csv.parseRows(csvData.replace(/\s*;\s*/g, ","))[0];
+}
+
+function resetFilters() {
+    for(var i in relationshipStatus) {
+        relationshipStatus[i].checked = true;
+        d3.selectAll('.relationFilters input').property('checked', 'true');
+    } 
+    significanceFilter = 1;
+    d3.select('#slider').property('value',1);
+    d3.select('.centerPoint').property('value',selectedNode.Index);
+}
+
+// Get the link of the given node
+function getLink(currentNode) {
+    for(var i in links) {
+        if(links[i].source.Index == selectedNode.Index && links[i].target.Index == currentNode.Index) {
+            return links[i];
+        }
+    }
+    return null;
+}
+
+// Move the given element in front of its sibling elements
 function moveToFront(element) {
+	console.log(element[0]);
 	element.each(function() {
+		// console.log(this);
 		this.parentNode.appendChild(this);
 	});
 }
