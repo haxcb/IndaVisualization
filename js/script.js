@@ -1,11 +1,17 @@
-var width = 1000,
-	height = 800,
+var width = 1200,
+	height = 1000,
 	radius = 15;
 	
-var orange = d3.rgb(255, 161, 51);	
+var orange = d3.rgb(255, 161, 51),	
+	lightGray = d3.rgb(245, 228, 198),	
+	lightestGray = d3.rgb(255, 250, 230),	
+    bg = d3.rgb(51, 51, 51);	
+	
+var padding = 5;
 
 var force = d3.layout.force()
-    .charge(-600)
+	.gravity(0.05)
+    .charge(function(d, i) { return i ? -600 : -2000; })
     .linkDistance(260)
     .size([width, height]);
 
@@ -136,8 +142,8 @@ function setUpInteractions() {
     for(var i in nodes) {
         opts += '<option value="' + i + '">' + (nodes[i].Name + " " + nodes[i].FamilyName) + '</option>';
     }
-    d3.select('.centerPoint').html(opts);
-    d3.select('.centerPoint').on('change',changeCenterPoint);
+    d3.select('select').html(opts);
+    d3.select('select').on('change',changeCenterPoint);
     d3.selectAll('.relationFilters input').on('change',getRelationships);
     d3.select('#slider').on('change',changeCharacterSignificance);
 }
@@ -215,11 +221,15 @@ function buildVisual() {
         .attr("r", radius)
         .filter(function(currentNode, currentIndex) {
             if(currentNode.Index == selectedNode.Index) {
-                currentNode.x = width/2;
-                currentNode.y = height/2;
+                // currentNode.x = width/2;
+                // currentNode.y = height/2;
             }
             for(var i in visibleNodes) {
                 if(currentNode.Index == visibleNodes[i].Index || selectedNode.Index == currentNode.Index) {
+					currentNode.gravity = {
+						x: currentNode.x,
+						y: currentNode.y
+					};
                     return true;
                 } 
             }
@@ -229,8 +239,7 @@ function buildVisual() {
             selectedNode = currentNode;
             resetFilters();
             buildVisual();
-        })
-        .call(force.drag);
+        });
         
 
 
@@ -268,18 +277,34 @@ function buildVisual() {
            
     nodeItems.append("circle")      
         .attr("r", radius);
-
-    nodeItems.append("text")
+		
+    
+	nodeItems.append("text")
         .attr("dx", 25)
         .attr("dy", ".35em")
-        .style("fill", orange)
+        .style("fill", lightGray)
         .text(function(d) {
             if(d.AKA != "") {
                 return (d.Name + " " + d.FamilyName + " (" + d.AKA + ")");
             }
             return (d.Name + " " + d.FamilyName);
         });
-
+		
+	// Add rectangles behind text labels
+	var el = document.getElementsByTagName('text'); 
+	nodeItems.append("rect")
+		.attr("x", function(d, i) {return el[i].getBBox().x - padding})
+		.attr("y", function(d, i) {return el[i].getBBox().y - padding})
+		.attr("width", function(d, i) {return el[i].getBBox().width + padding *2})
+		.attr("height", function(d, i) {return el[i].getBBox().height + padding*2})
+		.style('opacity', 0.5)
+		.attr("fill", bg);	
+	
+	// Reorder the rectangles to be behind text
+	
+	moveToFront(d3.selectAll("text"));
+	
+	// Add image icons to nodes
     nodeItems.append("image")
         .attr("xlink:href", function(currentNode,currentIndex) {
             var link = getLink(currentNode);
@@ -291,12 +316,39 @@ function buildVisual() {
         .attr("y", -15)
         .attr("height", 31)
         .attr("width", 31);
+	
+	// Style the central node
+	var centralNode = nodeItems.filter(function(currentNode, currentIndex) {
+		return currentNode.Index == selectedNode.Index;
+	});
 
-    force.on("tick", function() {
+	centralNode.selectAll("circle")
+		.attr("class", "central")
+		.attr("fill", bg)
+		.attr("stroke", orange)
+		.attr("stroke-width", 5)
+		.attr("r", radius*1.5);
+		
+	centralNode.selectAll("text")
+		.attr("dx", 40)
+		.style("font-size", "14px")
+		.style("fill", lightestGray);
+		
+	centralNode.selectAll("rect")
+		.attr("x", 25)
+		.attr("width", function(currentNode, currentIndex) { return this.getBBox().width + 45; });
+		
+
+	
+	
+	nodeItems.call(force.drag);
+
+    force.on("tick", function(e) {
         linkItems.attr("x1", function(d) { return d.source.x; })
         .attr("y1", function(d) { return d.source.y; })
         .attr("x2", function(d) { return d.target.x; })
         .attr("y2", function(d) { return d.target.y; });
+		
    
         nodeItems.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
         .attr("cx", function(d) { return d.x = Math.max(radius*2, Math.min(width - radius*2, d.x)); })
@@ -304,6 +356,10 @@ function buildVisual() {
     });
 }
 
-
+function moveToFront(element) {
+	element.each(function() {
+		this.parentNode.appendChild(this);
+	});
+}
     
 
