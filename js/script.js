@@ -1,5 +1,5 @@
 var width = 1300,
-	height = 900,
+	height = 975,
 	radius = 15;
 	
 var orange = d3.rgb(255, 161, 51),	
@@ -22,7 +22,8 @@ var svg = d3.select(".svgContainer")
 	.attr("height", height);
 	
 var slider = d3.select("#slider"),
-	dropdown = d3.select("select");
+	dropdown = d3.select("select"),
+	resetButton = d3.select("#reset");
 		
 var nodes = [],
     links = [],
@@ -163,7 +164,10 @@ function setUpInteractions() {
     d3.selectAll('.relationFilters input').on('change',getRelationships);
 	
 	// Event for char significance slider changes
-    slider.on('change',changeCharacterSignificance);
+    slider.on('change', changeCharacterSignificance);
+	
+	// Event for resetting filter button
+	resetButton.on("click", resetNodeFilters);
 }
 
 function getRelationships() {
@@ -184,7 +188,11 @@ function changeCharacterSignificance() {
 
 function changeCenterPoint() {
     selectedNode = nodes[d3.event.target.value];
-    resetFilters();
+    resetNodeFilters();
+}
+
+function resetNodeFilters() {
+	resetFilters();
     buildVisual();
 	playTransition() 
 }
@@ -242,8 +250,7 @@ function buildVisual() {
 		.attr("class", function(currentNode, currentIndex) { return "node node" + currentIndex; })
 		.filter(function(currentNode, currentIndex) {
 			if(currentNode.Index == selectedNode.Index) {
-				// currentNode.fixed = true;
-				currentNode.x = (width-columnPadding)/2 + columnPadding;
+				currentNode.x = (width-columnPadding)/2 + columnPadding - 50;
 				currentNode.y = height/2;
 				return true;
 			}
@@ -358,6 +365,8 @@ function buildVisual() {
 		.attr("stroke-width", 5)
 		.attr("r", radius*1.5);
 		
+	centralNode.selectAll("image").remove();
+		
 	centralNode.selectAll("text")
 		.attr("dx", 0)
 		.style("font-size", "17px")
@@ -387,7 +396,7 @@ function buildVisual() {
 			.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
 			.attr("cx", function(d) { 
 				if(d.Index == selectedNode.Index) {
-					d.x = (width-columnPadding)/2 + columnPadding;
+					d.x = (width-columnPadding)/2 + columnPadding - 50;
 					d.y = height/2;
 				}
 				return d.x = Math.max(columnPadding + radius*2, Math.min(width - radius*2, d.x)); 
