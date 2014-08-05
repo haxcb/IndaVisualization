@@ -202,7 +202,6 @@ function buildVisual() {
 			links[i].target = getNode(links[i].target);
 		}
 		for(var i in relationshipStatus) {
-			// console.log(links[i].target);
 			if(selectedNode.Index == currentLink.source.Index) {
 				var target = currentLink.target;
 				relevantNodes.push(target);
@@ -238,6 +237,7 @@ function buildVisual() {
 		.attr("class", function(currentNode, currentIndex) { return "node node" + currentIndex; })
 		.filter(function(currentNode, currentIndex) {
 			if(currentNode.Index == selectedNode.Index) {
+				// currentNode.fixed = true;
 				// currentNode.x = width/2;
 				// currentNode.y = height/2;
 			}
@@ -254,51 +254,7 @@ function buildVisual() {
 				resetFilters();
 				buildVisual();
 			}
-        });
-	
-	console.log(relevantNodes);
-	console.log(visibleNodes);
-	
-	
-	// nodeItems
-	// .style("fill", "gray");
-        
-
-	// Remove undrawn nodes
-    // svg.selectAll(".node")
-        // .filter(function(currentNode, currentIndex) {
-            // for(var i in visibleNodes) {
-                // if(currentNode.Index == visibleNodes[i].Index || currentNode.Index == selectedNode.Index)
-                // {
-                    // return false;
-                // }
-            // }
-            // return true;
-        // }).remove();
-
-		
-	// Remove undrawn links
-    svg.selectAll(".link")
-		.filter(function(currentLink, currentIndex) {
-			if(currentLink.source.Index == selectedNode.Index) {
-				for(var i in visibleNodes) {
-					if(visibleNodes[i].Index == currentLink.target.Index) {
-						return false;
-					}
-				}
-				return true;
-			} 
-			else if(currentLink.target.Index == selectedNode.Index) {
-				for(var i in visibleNodes) {
-					if(visibleNodes[i].Index == currentLink.source.Index) {
-						return false;
-					}
-				}
-				return true;
-			}
-			return true;
-		}).remove();
-           
+        });        
 		   
     nodeItems.append("circle")      
         .attr("r", radius);
@@ -383,19 +339,43 @@ function buildVisual() {
 		// .duration(500)
 		// .style("opacity", 1.0)
 		// .each("end", function() {
-			d3.selectAll(".node").on("mouseover", function(currentNode, currentIndex) {
-				moveToFront(d3.select(".node" + currentIndex));
+		nodeItems
+			.on("mouseout", function(currentNode, currentIndex) {
+				d3.select(".node" + currentNode.Index + " text")
+					.transition()
+					.duration(100)
+					.style("fill", lightGray);
+				d3.select(".node" + currentNode.Index + " rect")
+					.transition()
+					.duration(100)
+					.style("fill", bg)
+					.style("opacity", 0.5);
+			})
+			.on("mouseover", function(currentNode, currentIndex) {
+				d3.select(".node" + currentNode.Index + " text")
+					.transition()
+					.duration(100)
+					.style("fill", "black");
+				d3.select(".node" + currentNode.Index + " rect")
+					.transition()
+					.duration(100)
+					.style("fill", orange)
+					.style("opacity", 1);
+				
+				moveToFront(d3.select(".node" + currentNode.Index));
 			});
 		// });
 
     force.on("tick", function(e) {
-        linkItems.attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
+        linkItems
+			.attr("x1", function(d) { return d.source.x; })
+			.attr("y1", function(d) { return d.source.y; })
+			.attr("x2", function(d) { return d.target.x; })
+			.attr("y2", function(d) { return d.target.y; });
 		
    
-        nodeItems.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+        nodeItems
+			.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
 			.attr("cx", function(d) { 
 				return d.x = Math.max(radius*2, Math.min(width - radius*2, d.x)); 
 			})
@@ -445,9 +425,10 @@ function getNode(index) {
 
 // Move the given element in front of its sibling elements
 function moveToFront(element) {
-	element.each(function() {
-		this.parentNode.appendChild(this);
-	});
+	element
+		.each(function() {
+			this.parentNode.appendChild(this);
+		});
 }
     
 
