@@ -11,7 +11,7 @@ var padding = 5;
 
 var force = d3.layout.force()
 	.gravity(0.05)
-    .charge(-500)
+    .charge(-2000)
     .linkDistance(150)
     .size([width, height]);
 
@@ -241,8 +241,8 @@ function buildVisual() {
 				// currentNode.x = width/2;
 				// currentNode.y = height/2;
 			}
-			for(var i in relevantNodes) {
-				if(currentNode.Index == relevantNodes[i].Index || selectedNode.Index == currentNode.Index) {
+			for(var i in visibleNodes) {
+				if(currentNode.Index == visibleNodes[i].Index || selectedNode.Index == currentNode.Index) {
 					return true;
 				} 
 			}
@@ -313,7 +313,7 @@ function buildVisual() {
 		return false;
 	});
 	
-	linkedNodes.append("text")
+	nodeItems.append("text")
         .attr("dx", 25)
         .attr("dy", ".35em")
         .style("fill", lightGray)
@@ -327,7 +327,7 @@ function buildVisual() {
 		
 	// Add rectangles behind text labels
 	var el = document.getElementsByTagName('text'); 
-	linkedNodes.append("rect")
+	nodeItems.append("rect")
 		.attr("x", function(d, i) {return el[i].getBBox().x - padding})
 		.attr("y", function(d, i) {return el[i].getBBox().y - padding})
 		.attr("width", function(d, i) {return el[i].getBBox().width + padding *2})
@@ -350,22 +350,6 @@ function buildVisual() {
         .attr("y", -15)
         .attr("height", 31)
         .attr("width", 31);
-		
-	var unlinkedNodes = nodeItems.filter(function(currentNode, currentIndex) {
-		for(var i in visibleNodes) {
-			if(visibleNodes[i].Index == currentNode.Index) {
-				return false;
-			}
-		}
-		return true;
-	});
-	unlinkedNodes.style("fill", "gray");
-	
-	unlinkedNodes.selectAll("circle")
-		.attr("transform","scale(0.5)");
-		
-	unlinkedNodes.selectAll("image")
-		.attr("transform","scale(0.5)");
 		
 	
 	// Style the central node
