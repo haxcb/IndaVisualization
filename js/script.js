@@ -182,7 +182,7 @@ function getRelationships() {
 }
 
 function changeCharacterSignificance() {
-    significanceFilter = d3.event.target.value;
+    significanceFilter = 6 - parseInt(d3.event.target.value);
     buildVisual();
 }
 
