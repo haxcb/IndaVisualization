@@ -369,9 +369,10 @@ function buildVisual() {
 		
 	centralNode.selectAll("text")
 		.attr("dx", 0)
-		.style("font-size", "17px")
+		.style("font-size", "18px")
+		.style("font-weight", "100")
 		.style("text-anchor", 'middle')
-		.style("fill", lightestGray);
+		.style("fill", "white");
 		
 	centralNode.selectAll("rect")
 		.attr("x", centralElement.getBBox().x - padding*2)
@@ -421,7 +422,7 @@ function resetFilters() {
         d3.selectAll('.relationFilters input').property('checked', 'true');
     } 
     significanceFilter = 1;
-    slider.property('value', 1);
+    slider.property('value', 5);
     dropdown.property('value', selectedNode.Index);
 }
 
