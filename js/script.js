@@ -312,7 +312,9 @@ function buildVisual() {
         .attr("width", 31);
 		
 	
+	
 	// Style the central node
+	var centralElement = document.getElementsByClassName("node"+selectedNode.Index)[0];
 	var centralNode = nodeItems.filter(function(currentNode, currentIndex) {
 		return currentNode.Index == selectedNode.Index;
 	});
@@ -330,8 +332,8 @@ function buildVisual() {
 		.style("fill", lightestGray);
 		
 	centralNode.selectAll("rect")
-		.attr("x", 25)
-		.attr("width", function(currentNode, currentIndex) { return this.getBBox().width + 45; });
+		.attr("x", 35)
+		.attr("width", function(currentNode, currentIndex) { return centralElement.getBBox().width - 50; });
 
 	centralNode.call(force.drag);
 	linkedNodes.call(force.drag);
