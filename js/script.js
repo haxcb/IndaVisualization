@@ -11,13 +11,16 @@ var padding = 5;
 
 var force = d3.layout.force()
 	.gravity(0.05)
-    .charge(function(d, i) { return i ? -600 : -2000; })
-    .linkDistance(260)
+    .charge(-500)
+    .linkDistance(150)
     .size([width, height]);
 
 var svg = d3.select(".container").append("svg")
 	.attr("width", width)
 	.attr("height", height);
+	
+var slider = d3.select("#slider"),
+	dropdown = d3.select("select");
 		
 var nodes = [],
     links = [],
@@ -142,14 +145,21 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
 ////////////////////////////////////////////////////////
 
 function setUpInteractions() {
+	// Build dropdown menu dynamically
     var opts = '';
     for(var i in nodes) {
         opts += '<option value="' + i + '">' + (nodes[i].Name + " " + nodes[i].FamilyName) + '</option>';
     }
-    d3.select('select').html(opts);
-    d3.select('select').on('change',changeCenterPoint);
+    dropdown.html(opts);
+	
+	// Event for dropdown changes
+    dropdown.on('change',changeCenterPoint);
+	
+	// Event for relationship filter changes
     d3.selectAll('.relationFilters input').on('change',getRelationships);
-    d3.select('#slider').on('change',changeCharacterSignificance);
+	
+	// Event for char significance slider changes
+    slider.on('change',changeCharacterSignificance);
 }
 
 function getRelationships() {
@@ -178,72 +188,93 @@ function changeCenterPoint() {
 //				DRAW CODE
 ////////////////////////////////////////////////////////
 
+var relevantNodes = [];
 
 function buildVisual() {
     visibleNodes = [];
+    relevantNodes = [];
+	visibleLinks = [];
+	
+	for(var i in links) {
+		var currentLink = links[i];
+		if(!isNaN(links[i].source)) {
+			links[i].source = getNode(links[i].source);
+			links[i].target = getNode(links[i].target);
+		}
+		for(var i in relationshipStatus) {
+			// console.log(links[i].target);
+			if(selectedNode.Index == currentLink.source.Index) {
+				var target = currentLink.target;
+				relevantNodes.push(target);
+				
+				if(currentLink.type == relationshipStatus[i].type && relationshipStatus[i].checked && target.Importance >= significanceFilter) {
+					visibleNodes.push(target);
+					visibleLinks.push(currentLink);					
+					break;
+				}
+			}
+		}
+	}
+	
+	console.log(visibleLinks);
+	
     svg.html("");
 	
     force
         .nodes(nodes)
-        .links(links)
+        .links(visibleLinks)
         .start();
 
     var linkItems = svg.selectAll(".link")
-        .data(links)
+        .data(visibleLinks)
         .enter().append("line")
         .attr("class", "link")
-        .filter(function(currentLink, currentIndex) {
-            for(var i in relationshipStatus) {
-                if(currentLink.type == relationshipStatus[i].type && relationshipStatus[i].checked) {
-                    if(selectedNode.Index == currentLink.source.Index && currentLink.target.Importance >= significanceFilter) {
-                        visibleNodes.push(currentLink.target);
-                        return true;
-                    }
-                }
-            }
-            return false;
-        })
         .style("stroke-width", function(d) { return Math.sqrt(d.value); });
-
+	
     var nodeItems = svg.selectAll(".node")
         .data(nodes)
         .enter().append("g")
         .attr("r", radius)
-        .filter(function(currentNode, currentIndex) {
-            if(currentNode.Index == selectedNode.Index) {
-                // currentNode.x = width/2;
-                // currentNode.y = height/2;
-            }
-            for(var i in visibleNodes) {
-                if(currentNode.Index == visibleNodes[i].Index || selectedNode.Index == currentNode.Index) {
-					currentNode.gravity = {
-						x: currentNode.x,
-						y: currentNode.y
-					};
-                    return true;
-                } 
-            }
-            return false;
-        })
 		.attr("class", function(currentNode, currentIndex) { return "node node" + currentIndex; })
+		.filter(function(currentNode, currentIndex) {
+			if(currentNode.Index == selectedNode.Index) {
+				// currentNode.x = width/2;
+				// currentNode.y = height/2;
+			}
+			for(var i in relevantNodes) {
+				if(currentNode.Index == relevantNodes[i].Index || selectedNode.Index == currentNode.Index) {
+					return true;
+				} 
+			}
+			return false;
+		})
         .on("click", function (currentNode, currentIndex) {
-            selectedNode = currentNode;
-            resetFilters();
-            buildVisual();
+			if(currentNode.Index != selectedNode.Index) {
+				selectedNode = currentNode;
+				resetFilters();
+				buildVisual();
+			}
         });
+	
+	console.log(relevantNodes);
+	console.log(visibleNodes);
+	
+	
+	// nodeItems
+	// .style("fill", "gray");
         
 
 	// Remove undrawn nodes
-    svg.selectAll(".node")
-        .filter(function(currentNode, currentIndex) {
-            for(var i in visibleNodes) {
-                if(currentNode.Index == visibleNodes[i].Index || currentNode.Index == selectedNode.Index)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }).remove();
+    // svg.selectAll(".node")
+        // .filter(function(currentNode, currentIndex) {
+            // for(var i in visibleNodes) {
+                // if(currentNode.Index == visibleNodes[i].Index || currentNode.Index == selectedNode.Index)
+                // {
+                    // return false;
+                // }
+            // }
+            // return true;
+        // }).remove();
 
 		
 	// Remove undrawn links
@@ -273,7 +304,16 @@ function buildVisual() {
         .attr("r", radius);
 		  
 		  
-	nodeItems.append("text")
+	var linkedNodes = nodeItems.filter(function(currentNode, currentIndex) {
+		for(var i in visibleNodes) {
+			if(visibleNodes[i].Index == currentNode.Index) {
+				return true;
+			}
+		}
+		return false;
+	});
+	
+	linkedNodes.append("text")
         .attr("dx", 25)
         .attr("dy", ".35em")
         .style("fill", lightGray)
@@ -282,12 +322,12 @@ function buildVisual() {
                 return (d.Name + " " + d.FamilyName + " (" + d.AKA + ")");
             }
             return (d.Name + " " + d.FamilyName);
-        });
+        });	
 		
 		
 	// Add rectangles behind text labels
 	var el = document.getElementsByTagName('text'); 
-	nodeItems.append("rect")
+	linkedNodes.append("rect")
 		.attr("x", function(d, i) {return el[i].getBBox().x - padding})
 		.attr("y", function(d, i) {return el[i].getBBox().y - padding})
 		.attr("width", function(d, i) {return el[i].getBBox().width + padding *2})
@@ -310,6 +350,23 @@ function buildVisual() {
         .attr("y", -15)
         .attr("height", 31)
         .attr("width", 31);
+		
+	var unlinkedNodes = nodeItems.filter(function(currentNode, currentIndex) {
+		for(var i in visibleNodes) {
+			if(visibleNodes[i].Index == currentNode.Index) {
+				return false;
+			}
+		}
+		return true;
+	});
+	unlinkedNodes.style("fill", "gray");
+	
+	unlinkedNodes.selectAll("circle")
+		.attr("transform","scale(0.5)");
+		
+	unlinkedNodes.selectAll("image")
+		.attr("transform","scale(0.5)");
+		
 	
 	// Style the central node
 	var centralNode = nodeItems.filter(function(currentNode, currentIndex) {
@@ -325,26 +382,27 @@ function buildVisual() {
 		
 	centralNode.selectAll("text")
 		.attr("dx", 40)
-		.style("font-size", "14px")
+		.style("font-size", "17px")
 		.style("fill", lightestGray);
 		
 	centralNode.selectAll("rect")
 		.attr("x", 25)
 		.attr("width", function(currentNode, currentIndex) { return this.getBBox().width + 45; });
 
-	nodeItems.call(force.drag);
+	centralNode.call(force.drag);
+	linkedNodes.call(force.drag);
 	
 	// Fade in?? 
-	d3.selectAll(".node").style("opacity", 0.0)
-		.transition()
-		.duration(500)
-		.style("opacity", 1.0)
-		.each("end", function() {
+	// d3.selectAll(".node")
+	// .style("opacity", 0.0)
+		// .transition()
+		// .duration(500)
+		// .style("opacity", 1.0)
+		// .each("end", function() {
 			d3.selectAll(".node").on("mouseover", function(currentNode, currentIndex) {
-				console.log(".node" + currentIndex);
 				moveToFront(d3.select(".node" + currentIndex));
 			});
-		});
+		// });
 
     force.on("tick", function(e) {
         linkItems.attr("x1", function(d) { return d.source.x; })
@@ -354,8 +412,12 @@ function buildVisual() {
 		
    
         nodeItems.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-        .attr("cx", function(d) { return d.x = Math.max(radius*2, Math.min(width - radius*2, d.x)); })
-        .attr("cy", function(d) { return d.y = Math.max(radius*2, Math.min(height - radius*2, d.y)); });
+			.attr("cx", function(d) { 
+				return d.x = Math.max(radius*2, Math.min(width - radius*2, d.x)); 
+			})
+			.attr("cy", function(d) { 
+				return d.y = Math.max(radius*2, Math.min(height - radius*2, d.y)); 
+			});
     });
 }
 
@@ -373,8 +435,8 @@ function resetFilters() {
         d3.selectAll('.relationFilters input').property('checked', 'true');
     } 
     significanceFilter = 1;
-    d3.select('#slider').property('value',1);
-    d3.select('.centerPoint').property('value',selectedNode.Index);
+    slider.property('value', 1);
+    dropdown.property('value', selectedNode.Index);
 }
 
 // Get the link of the given node
@@ -387,11 +449,19 @@ function getLink(currentNode) {
     return null;
 }
 
+// Get the link of the given node
+function getNode(index) {
+    for(var i in nodes) {
+        if(nodes[i].Index == index) {
+			return nodes[i];
+		}
+    }
+    return null;
+}
+
 // Move the given element in front of its sibling elements
 function moveToFront(element) {
-	console.log(element[0]);
 	element.each(function() {
-		// console.log(this);
 		this.parentNode.appendChild(this);
 	});
 }
