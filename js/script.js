@@ -71,7 +71,7 @@ function createLinks(relationshipType, people, sourceIndex) {
     } 
 }
 
-d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) { 
+d3.csv("http://www.sfu.ca/~harshad/files/IAT355/Final/data/indaData.csv", function(csv, index) { 
 
     nodes.push({"Index": index,
                 "Name": csv.Name,
@@ -103,7 +103,6 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
     };
 	
 }, function(error, rows){
-    console.log(rows);
 
     for(var i in rows) {
         createLinks("ParentOf", rows[i].ParentOf,i);
@@ -228,8 +227,6 @@ function buildVisual() {
 		}
 	}
 	
-	console.log(visibleLinks);
-	
     svg.html("");
 	
     force
@@ -313,7 +310,7 @@ function buildVisual() {
         .attr("xlink:href", function(currentNode,currentIndex) {
             var link = getLink(currentNode);
             if(link != null) {
-                return "http://www.sfu.ca/~ssumal/Inda/css/images/" + link.type + ".png";
+                return "http://www.sfu.ca/~harshad/files/IAT355/Final/css/images/" + link.type + ".png";
             }
         })
         .attr("x", -15)

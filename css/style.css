@@ -250,17 +250,25 @@ input[type="range"]::-webkit-slider-thumb:hover{
 	margin-bottom:10px;
 }
 
+.relationFilters input[type="checkbox"] + img:hover {
+	transition:background-color 0.1s;
+	-webkit-transition:background-color 0.1s;
+	background-color:#777;
+}
 	
 .relationFilters input[type="checkbox"]:checked + img {	
 	background-color:#ffa133;
 }
 	
 
-.relationFilters input[type="checkbox"] + img:hover {
+.relationFilters input[type="checkbox"]:checked + img:hover {
 	transition:background-color 0.1s;
 	-webkit-transition:background-color 0.1s;
 	background-color:#FFD2B3;
-}	
+}
+
+
+
 	
 .relationFilters input[type="checkbox"] + p {	
 	color:#999999;
