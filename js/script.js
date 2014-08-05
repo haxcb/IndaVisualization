@@ -243,8 +243,8 @@ function buildVisual() {
 		.filter(function(currentNode, currentIndex) {
 			if(currentNode.Index == selectedNode.Index) {
 				// currentNode.fixed = true;
-				// currentNode.x = width/2;
-				// currentNode.y = height/2;
+				currentNode.x = (width-columnPadding)/2 + columnPadding;
+				currentNode.y = height/2;
 				return true;
 			}
 			for(var i in visibleNodes) {
@@ -314,7 +314,36 @@ function buildVisual() {
         .attr("height", 31)
         .attr("width", 31);
 		
-	
+	// Hover animation	
+	nodeItems
+		.on("mouseout", function(currentNode, currentIndex) {
+			var opacity = 0.5;
+			if(currentNode.Index == selectedNode.Index) {
+				opacity = 1;
+			}
+			d3.select(".node" + currentNode.Index + " text")
+				.transition()
+				.duration(150)
+				.style("fill", lightGray);
+			d3.select(".node" + currentNode.Index + " rect")
+				.transition()
+				.duration(150)
+				.style("fill", bg)
+				.style("opacity", opacity);
+		})
+		.on("mouseover", function(currentNode, currentIndex) {
+			d3.select(".node" + currentNode.Index + " text")
+				.transition()
+				.duration(150)
+				.style("fill", "black");
+			d3.select(".node" + currentNode.Index + " rect")
+				.transition()
+				.duration(150)
+				.style("fill", orange)
+				.style("opacity", 0.9);
+			
+			moveToFront(d3.select(".node" + currentNode.Index));
+		});	
 	
 	// Style the central node
 	var centralElement = document.getElementsByClassName("node"+selectedNode.Index)[0];
@@ -330,43 +359,21 @@ function buildVisual() {
 		.attr("r", radius*1.5);
 		
 	centralNode.selectAll("text")
-		.attr("dx", 40)
+		.attr("dx", 0)
 		.style("font-size", "17px")
+		.style("text-anchor", 'middle')
 		.style("fill", lightestGray);
 		
 	centralNode.selectAll("rect")
-		.attr("x", 35)
-		.attr("width", function(currentNode, currentIndex) { return centralElement.getBBox().width - 50; });
-
+		.attr("x", centralElement.getBBox().x - padding*2)
+		.style("opacity", 1)
+		.attr("width", function(currentNode, currentIndex) { return centralElement.getBBox().width + padding*2; });
+	
+	moveToFront(centralNode);
+	
 	centralNode.call(force.drag);
 	linkedNodes.call(force.drag);
 	
-	// Hover animation	
-	nodeItems
-		.on("mouseout", function(currentNode, currentIndex) {
-			d3.select(".node" + currentNode.Index + " text")
-				.transition()
-				.duration(150)
-				.style("fill", lightGray);
-			d3.select(".node" + currentNode.Index + " rect")
-				.transition()
-				.duration(150)
-				.style("fill", bg)
-				.style("opacity", 0.5);
-		})
-		.on("mouseover", function(currentNode, currentIndex) {
-			d3.select(".node" + currentNode.Index + " text")
-				.transition()
-				.duration(150)
-				.style("fill", "black");
-			d3.select(".node" + currentNode.Index + " rect")
-				.transition()
-				.duration(150)
-				.style("fill", orange)
-				.style("opacity", 0.9);
-			
-			moveToFront(d3.select(".node" + currentNode.Index));
-		});
 
     force.on("tick", function(e) {
         linkItems
@@ -379,7 +386,10 @@ function buildVisual() {
         nodeItems
 			.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
 			.attr("cx", function(d) { 
-				
+				if(d.Index == selectedNode.Index) {
+					d.x = (width-columnPadding)/2 + columnPadding;
+					d.y = height/2;
+				}
 				return d.x = Math.max(columnPadding + radius*2, Math.min(width - radius*2, d.x)); 
 			})
 			.attr("cy", function(d) { 
