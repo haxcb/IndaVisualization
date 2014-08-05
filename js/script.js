@@ -1,5 +1,5 @@
-var width = 1200,
-	height = 1000,
+var width = 1300,
+	height = 900,
 	radius = 15;
 	
 var orange = d3.rgb(255, 161, 51),	
@@ -7,7 +7,8 @@ var orange = d3.rgb(255, 161, 51),
 	lightestGray = d3.rgb(255, 250, 230),	
     bg = d3.rgb(51, 51, 51);	
 	
-var padding = 5;
+var padding = 5,
+	columnPadding = 350;
 
 var force = d3.layout.force()
 	.gravity(0.05)
@@ -15,7 +16,8 @@ var force = d3.layout.force()
     .linkDistance(150)
     .size([width, height]);
 
-var svg = d3.select(".container").append("svg")
+var svg = d3.select(".svgContainer")
+	.append("svg")
 	.attr("width", width)
 	.attr("height", height);
 	
@@ -243,6 +245,7 @@ function buildVisual() {
 				// currentNode.fixed = true;
 				// currentNode.x = width/2;
 				// currentNode.y = height/2;
+				return true;
 			}
 			for(var i in visibleNodes) {
 				if(currentNode.Index == visibleNodes[i].Index || selectedNode.Index == currentNode.Index) {
@@ -376,7 +379,8 @@ function buildVisual() {
         nodeItems
 			.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
 			.attr("cx", function(d) { 
-				return d.x = Math.max(radius*2, Math.min(width - radius*2, d.x)); 
+				
+				return d.x = Math.max(columnPadding + radius*2, Math.min(width - radius*2, d.x)); 
 			})
 			.attr("cy", function(d) { 
 				return d.y = Math.max(radius*2, Math.min(height - radius*2, d.y)); 

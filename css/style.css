@@ -11,7 +11,6 @@ html {
 	background-color:#333; 
 }
 body {
-	min-width:1300px;
 	background-color:#333; 
 	background-image: -webkit-linear-gradient(
 		left, 
@@ -44,11 +43,19 @@ body {
 }
 
 .container {
-	width:1000px;
-	margin-left:350px;
+	width:100%;
+	
+}
+.svgContainer {
+/* 	float:left;
+	width:100%;
+	margin-left:-350px; */
 }
 
-.container > svg {
+.svgContainer > svg {
+	/* margin-left:350px; */
+/* 	float:left; */
+	/* overflow:hidden; */
 	/* background-color:#363636; */
 }
 
@@ -89,14 +96,14 @@ text {
 
 article {
 	position:absolute;
-	left:0;
 	top:0;
+	left:0;
 	display:block;
 	width:350px;
 	padding:15px 30px;
 	box-sizing:border-box;
 	background-color:#4c4c4c;
-	height:1000px;
+	height:900px;
 }
 
 section {
