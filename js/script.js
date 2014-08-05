@@ -8,7 +8,9 @@ var orange = d3.rgb(255, 161, 51),
     bg = d3.rgb(51, 51, 51);	
 	
 var padding = 5,
-	columnPadding = 350;
+	columnPadding = 350,
+	MID_Y = height/2,
+	MID_X = (width-columnPadding)/2 + columnPadding - 50;
 
 var force = d3.layout.force()
 	.gravity(0.05)
@@ -247,8 +249,8 @@ function buildVisual() {
 		.attr("class", function(currentNode, currentIndex) { return "node node" + currentIndex; })
 		.filter(function(currentNode, currentIndex) {
 			if(currentNode.Index == selectedNode.Index) {
-				currentNode.x = (width-columnPadding)/2 + columnPadding - 50;
-				currentNode.y = height/2;
+				currentNode.x = MID_X;
+				currentNode.y = MID_Y;
 				return true;
 			}
 			for(var i in visibleNodes) {
@@ -394,8 +396,8 @@ function buildVisual() {
 			.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
 			.attr("cx", function(d) { 
 				if(d.Index == selectedNode.Index) {
-					d.x = (width-columnPadding)/2 + columnPadding - 50;
-					d.y = height/2;
+					d.x = MID_X;
+					d.y = MID_Y;
 				}
 				return d.x = Math.max(columnPadding + radius*2, Math.min(width - radius*2, d.x)); 
 			})
