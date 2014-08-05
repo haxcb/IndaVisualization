@@ -137,6 +137,8 @@ d3.csv("http://www.sfu.ca/~ssumal/Inda/data/indaData.csv", function(csv, index) 
 
     setUpInteractions();
     buildVisual();
+	playTransition();
+
 });
 
 
@@ -182,6 +184,7 @@ function changeCenterPoint() {
     selectedNode = nodes[d3.event.target.value];
     resetFilters();
     buildVisual();
+	playTransition() 
 }
 
 ////////////////////////////////////////////////////////
@@ -253,6 +256,7 @@ function buildVisual() {
 				selectedNode = currentNode;
 				resetFilters();
 				buildVisual();
+				playTransition();
 			}
         });        
 		   
@@ -332,39 +336,32 @@ function buildVisual() {
 	centralNode.call(force.drag);
 	linkedNodes.call(force.drag);
 	
-	// Fade in?? 
-	// d3.selectAll(".node")
-	// .style("opacity", 0.0)
-		// .transition()
-		// .duration(500)
-		// .style("opacity", 1.0)
-		// .each("end", function() {
-		nodeItems
-			.on("mouseout", function(currentNode, currentIndex) {
-				d3.select(".node" + currentNode.Index + " text")
-					.transition()
-					.duration(100)
-					.style("fill", lightGray);
-				d3.select(".node" + currentNode.Index + " rect")
-					.transition()
-					.duration(100)
-					.style("fill", bg)
-					.style("opacity", 0.5);
-			})
-			.on("mouseover", function(currentNode, currentIndex) {
-				d3.select(".node" + currentNode.Index + " text")
-					.transition()
-					.duration(100)
-					.style("fill", "black");
-				d3.select(".node" + currentNode.Index + " rect")
-					.transition()
-					.duration(100)
-					.style("fill", orange)
-					.style("opacity", 1);
-				
-				moveToFront(d3.select(".node" + currentNode.Index));
-			});
-		// });
+	// Hover animation	
+	nodeItems
+		.on("mouseout", function(currentNode, currentIndex) {
+			d3.select(".node" + currentNode.Index + " text")
+				.transition()
+				.duration(150)
+				.style("fill", lightGray);
+			d3.select(".node" + currentNode.Index + " rect")
+				.transition()
+				.duration(150)
+				.style("fill", bg)
+				.style("opacity", 0.5);
+		})
+		.on("mouseover", function(currentNode, currentIndex) {
+			d3.select(".node" + currentNode.Index + " text")
+				.transition()
+				.duration(150)
+				.style("fill", "black");
+			d3.select(".node" + currentNode.Index + " rect")
+				.transition()
+				.duration(150)
+				.style("fill", orange)
+				.style("opacity", 0.9);
+			
+			moveToFront(d3.select(".node" + currentNode.Index));
+		});
 
     force.on("tick", function(e) {
         linkItems
@@ -431,4 +428,11 @@ function moveToFront(element) {
 		});
 }
     
+function playTransition() {
+	d3.selectAll(".node")
+		.style("opacity", 0.0)
+			.transition()
+			.duration(500)
+			.style("opacity", 1.0);
+}
 
