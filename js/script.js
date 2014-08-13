@@ -517,7 +517,7 @@ function resetFilters() {
         d3.selectAll('.relationFilters input').property('checked', 'true');
     } 
     significanceFilter = 1;
-    slider.property('value', 5);
+    slider.property('value', 1);
     dropdown.property('value', selectedNode.Index);
 }
 
