@@ -2,7 +2,9 @@ var width = 1300,
 	height = 975,
 	radius = 15;
 	
-var orange = d3.rgb(255, 161, 51),	
+var orange = d3.rgb(255, 161, 51),
+	gray = d3.rgb(153, 153, 153),
+	hoverColor = d3.rgb(255, 210, 179),	
 	lightGray = d3.rgb(245, 228, 198),	
 	lightestGray = d3.rgb(255, 250, 230),	
     bg = d3.rgb(51, 51, 51);	
@@ -273,7 +275,8 @@ function buildVisual() {
 				playTransition();
 			}
         });        
-		   
+	
+	// Assign custom colors to every node
     nodeItems.append("circle")      
         .attr("r", radius)
 		.attr("fill", function(currentNode, currentIndex) {
@@ -281,7 +284,6 @@ function buildVisual() {
 			if(link != null) {
 				for(var i in relationshipStatus) {
 					if(relationshipStatus[i].type == link.type) {
-						console.log(relationshipStatus[i].color);
 						return relationshipStatus[i].color;
 					}
 				}
@@ -369,15 +371,42 @@ function buildVisual() {
 		});	
 	
 	// Change the colors of the relationship filters on the sidebar
-	d3.selectAll('.relationFilters input[type="checkbox"]:checked + img ')
+	d3.selectAll('.relationFilters input[type="checkbox"] + img')
 		.style("background-color", function() {
 			var relation = d3.select(this).attr("src");
 			for(var i in relationshipStatus) {
-				if(relation.indexOf(relationshipStatus[i].type) > -1) {
+				if(relation.indexOf(relationshipStatus[i].type) > -1 && relationshipStatus[i].checked) {
 					return relationshipStatus[i].color;
 				}
 			}
-			return orange;
+			return gray;
+		})
+		.on('mouseover', function() {
+			// Change color on hover
+			var checkedStatus = d3.select(this).node().checked;
+			d3.select(this)
+				.transition()
+				.duration(150)
+				.style("background-color", hoverColor);
+		
+		})
+		.on('mouseout', function() {
+			// Change color back on mouseout
+			var relation = d3.select(this).attr("src");
+			for(var i in relationshipStatus) {
+				if(relation.indexOf(relationshipStatus[i].type) > -1 && relationshipStatus[i].checked) {
+					d3.select(this)
+						.transition()
+						.duration(150)
+						.style("background-color", relationshipStatus[i].color);
+					return;
+				}
+			}
+			d3.select(this)
+				.transition()
+				.duration(150)
+				.style("background-color", gray);
+			
 		});
 	
 	// Style the central node
