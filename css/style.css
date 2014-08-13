@@ -117,7 +117,8 @@ article {
 }
 
 section {
-	margin-bottom:40px;
+	margin-bottom:50px;
+	position:relative;
 }
 
 label {
@@ -165,12 +166,13 @@ button {
 	background-color:#FF8936;
 }
 
+/* Slider */
 
 form.slider {
 	background:url('images/sliderBG.png') no-repeat left top;
 	width:100%;
 	height: 35px;
-	margin-top:15px;
+	margin-top:5px;
 }
 
 input[type="range"] {
@@ -222,6 +224,17 @@ input[type="range"]::-webkit-slider-thumb:hover{
 	background-image:url('images/slider.png');	
 	border:0;
 }
+
+.significanceLabel {
+	text-align:center;
+	font-size:12px;
+	text-transform:capitalize;
+	position:absolute;
+	top:65px;
+	width:100%;
+}
+
+/* Relation Filters */
 
 .relationFilters label {
 	display:block;

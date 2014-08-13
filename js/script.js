@@ -27,7 +27,8 @@ var svg = d3.select(".svgContainer")
 	
 var slider = d3.select("#slider"),
 	dropdown = d3.select("select"),
-	resetButton = d3.select("#reset");
+	resetButton = d3.select("#reset"),
+	dropdownLabel = d3.select(".significanceLabel");
 		
 var nodes = [],
     links = [],
@@ -37,6 +38,13 @@ var selectedNode = 0;
 
 var relationshipStatus = [];
 var significanceFilter = 1;
+var significanceLabels = [
+		"Only show the most significant characters",
+		"Only show significant characters",
+		"Include moderately significant characters",
+		"Include insignificant characters",
+		"Show all characters"
+	];
 
 
 ////////////////////////////////////////////////////////
@@ -143,9 +151,7 @@ d3.csv("http://www.sfu.ca/~harshad/files/IAT355/Final/data/indaData.csv", functi
                         {type: "ServedBy", checked: true, color: d3.rgb(255, 140, 51)},
                         {type: "PimRyala", checked: true, color: d3.rgb(215, 160, 0)},						
                         {type: "KodlMarines", checked: true, color: d3.rgb(255, 185, 47)}];
-
-    selectedNode = nodes[0];
-
+						
     setUpInteractions();
     buildVisual();
 	playTransition();
@@ -158,15 +164,30 @@ d3.csv("http://www.sfu.ca/~harshad/files/IAT355/Final/data/indaData.csv", functi
 ////////////////////////////////////////////////////////
 
 function setUpInteractions() {
+	
+	var alphaNodes = [];
+	for(var i in nodes) {
+		alphaNodes.push(nodes[i]);
+	}
+	
+	alphaNodes.sort(function(a, b) {
+		return d3.ascending(a.Name, b.Name);
+	});
+
 	// Build dropdown menu dynamically
     var opts = '';
-    for(var i in nodes) {
-        opts += '<option value="' + i + '">' + (nodes[i].Name + " " + nodes[i].FamilyName) + '</option>';
+    for(var i in alphaNodes) {
+        opts += '<option value="' + alphaNodes[i].Index + '">' + (alphaNodes[i].Name + " " + alphaNodes[i].FamilyName) + '</option>';
     }
     dropdown.html(opts);
 	
+	selectedNode = nodes[0];
+	dropdown.property('value', 0);
+	
 	// Event for dropdown changes
     dropdown.on('change',changeCenterPoint);
+	
+	dropdownLabel.html(significanceLabels[4]);
 	
 	// Event for relationship filter changes
     d3.selectAll('.relationFilters input').on('change',getRelationships);
@@ -190,7 +211,9 @@ function getRelationships() {
 }
 
 function changeCharacterSignificance() {
-    significanceFilter = 6 - parseInt(d3.event.target.value);
+    significanceFilter = parseInt(d3.event.target.value);
+	var s = significanceLabels[parseInt(5 - significanceFilter)];
+	dropdownLabel.html(s);
     buildVisual();
 }
 
@@ -455,7 +478,16 @@ function buildVisual() {
 		
    
         nodeItems
-			.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+			.attr("transform", function(d) { 
+				var transform = "translate(" + d.x + "," + d.y + ")";
+				
+				// var scaleFactor = parseFloat(0.7 + (d.Importance / 5));
+				// if(d.Index == selectedNode.Index)
+					// scaleFactor = 1;
+				
+				// transform += "scale(" + scaleFactor + ")";
+				return transform; 
+			})
 			.attr("cx", function(d) { 
 				if(d.Index == selectedNode.Index) {
 					d.x = MID_X;
@@ -466,6 +498,8 @@ function buildVisual() {
 			.attr("cy", function(d) { 
 				return d.y = Math.max(radius*2, Math.min(height - radius*2, d.y)); 
 			});
+			
+
     });
 }
 
