@@ -346,10 +346,12 @@ function buildVisual() {
 			if(currentNode.Index == selectedNode.Index) {
 				opacity = 1;
 			}
+			// Change text color back
 			d3.select(".node" + currentNode.Index + " text")
 				.transition()
 				.duration(150)
 				.style("fill", lightGray);
+			// Change bg rect color back
 			d3.select(".node" + currentNode.Index + " rect")
 				.transition()
 				.duration(150)
@@ -357,10 +359,12 @@ function buildVisual() {
 				.style("opacity", opacity);
 		})
 		.on("mouseover", function(currentNode, currentIndex) {
+			// Change text color for hover
 			d3.select(".node" + currentNode.Index + " text")
 				.transition()
 				.duration(150)
 				.style("fill", "black");
+			// Change bg rect color for hover
 			d3.select(".node" + currentNode.Index + " rect")
 				.transition()
 				.duration(150)
