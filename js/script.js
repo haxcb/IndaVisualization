@@ -123,19 +123,24 @@ d3.csv("http://www.sfu.ca/~harshad/files/IAT355/Final/data/indaData.csv", functi
     }
 
     relationshipStatus = [  
-                        {type: "ParentOf", checked: true},
-                        {type: "SpouseOrBetrothed", checked: true},
-                        {type: "ChildOf", checked: true},
-                        {type: "InLoveWith", checked: true},
-                        {type: "Siblings", checked: true}, 
-                        {type: "AcademyClassmates", checked: true},
-                        {type: "AcademyTeacherFor", checked: true},
-                        {type: "CousinsWith", checked: true},
-                        {type: "RunnerFor", checked: true},
-                        {type: "PimRyala", checked: true},
-                        {type: "ServedBy", checked: true},
-                        {type: "TaughtBy", checked: true},
-                        {type: "KodlMarines", checked: true}];
+						// Yellows
+                        {type: "SpouseOrBetrothed", checked: true, color: d3.rgb(182, 11, 0)},
+                        {type: "InLoveWith", checked: true, color: d3.rgb(176, 0, 38)},
+                        {type: "ParentOf", checked: true, color: d3.rgb(222, 14, 45)},
+                        {type: "Siblings", checked: true, color: d3.rgb(203, 52, 56)},
+						
+						// Reds
+                        {type: "ChildOf", checked: true, color: d3.rgb(255, 76, 51)}, 
+                        {type: "CousinsWith", checked: true, color: d3.rgb(217, 46, 22)},
+                        {type: "AcademyClassmates", checked: true, color: d3.rgb(219, 72, 7)},
+                        {type: "AcademyTeacherFor", checked: true, color: d3.rgb(240, 88, 0)},					
+                        {type: "TaughtBy", checked: true, color: d3.rgb(217, 107, 22)},
+						{type: "RunnerFor", checked: true, color: d3.rgb(239, 128, 0)},
+						
+						// Oranges
+                        {type: "ServedBy", checked: true, color: d3.rgb(255, 140, 51)},
+                        {type: "PimRyala", checked: true, color: d3.rgb(215, 160, 0)},						
+                        {type: "KodlMarines", checked: true, color: d3.rgb(255, 185, 47)}];
 
     selectedNode = nodes[0];
 
@@ -270,7 +275,19 @@ function buildVisual() {
         });        
 		   
     nodeItems.append("circle")      
-        .attr("r", radius);
+        .attr("r", radius)
+		.attr("fill", function(currentNode, currentIndex) {
+			var link = getLink(currentNode);
+			if(link != null) {
+				for(var i in relationshipStatus) {
+					if(relationshipStatus[i].type == link.type) {
+						console.log(relationshipStatus[i].color);
+						return relationshipStatus[i].color;
+					}
+				}
+			}
+			return orange;
+		});
 		  
 		  
 	var linkedNodes = nodeItems.filter(function(currentNode, currentIndex) {
@@ -350,6 +367,18 @@ function buildVisual() {
 			
 			moveToFront(d3.select(".node" + currentNode.Index));
 		});	
+	
+	// Change the colors of the relationship filters on the sidebar
+	d3.selectAll('.relationFilters input[type="checkbox"]:checked + img ')
+		.style("background-color", function() {
+			var relation = d3.select(this).attr("src");
+			for(var i in relationshipStatus) {
+				if(relation.indexOf(relationshipStatus[i].type) > -1) {
+					return relationshipStatus[i].color;
+				}
+			}
+			return orange;
+		});
 	
 	// Style the central node
 	var centralElement = document.getElementsByClassName("node"+selectedNode.Index)[0];

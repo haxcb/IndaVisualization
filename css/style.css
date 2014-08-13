@@ -102,9 +102,6 @@ text {
   stroke-opacity: .6;
 }
 
-.node {
-	fill:#ffa133;
-}
 
 article {
 	position:absolute;
@@ -257,7 +254,7 @@ input[type="range"]::-webkit-slider-thumb:hover{
 }
 	
 .relationFilters input[type="checkbox"]:checked + img {	
-	background-color:#ffa133;
+	/* background-color:#ffa133; */
 }
 	
 
